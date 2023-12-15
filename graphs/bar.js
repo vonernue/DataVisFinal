@@ -87,7 +87,6 @@ export default function(data, svg, barWidth, barHeight){
         var currentTransform = d3.select(this).attr("transform").split("(")[1].split(",");
         var xTrans = currentTransform[0]
         var yTrans = currentTransform[1].split(")")[0]
-        console.log(xTrans, yTrans)
         return `translate(${parseFloat(xTrans) + 25}, ${yTrans})`
     });
 

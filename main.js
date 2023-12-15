@@ -50,8 +50,6 @@ var donutSelectedLegend = []
 var selectedBarDown = 0
 var selectedBarUp = 0
 var selectedBar = false
-var selectedData = []
-
 const barSvg = d3.select("#chart-area").append("svg")
 .attr("width", barTotalWidth)
 .attr("height", barTotalHeight)
@@ -62,10 +60,11 @@ const barSvg = d3.select("#chart-area").append("svg")
 .on("mouseup", function(e) {
   selectedBarUp = e.offsetX
   if (selectedBarDown > selectedBarUp){
-    tmp = selectedBarDown
+    let tmp = selectedBarDown
     selectedBarDown = selectedBarUp
     selectedBarUp = tmp
   }
+  console.log(selectedBarUp, selectedBarDown)
   barChart.append("rect")
   .attr("x", selectedBarDown-100)
   .attr("y", 0)
@@ -78,14 +77,12 @@ const barSvg = d3.select("#chart-area").append("svg")
   barChart.selectAll(".barRect")
   .filter(function(d) {
     if (d == undefined) return false
-    return d.x0 * 5.7 + 100 <= selectedBarDown || d.x1 * 5.7 + 100 >= selectedBarUp
+    return !((d.x1 * 47.5 + 50 >= selectedBarDown && d.x1 * 47.5+ 50 <= selectedBarUp) || 
+            (d.x0 * 47.5+ 50 <= selectedBarUp && d.x0 * 47.5+50 >= selectedBarDown))
   })
   .transition()
   .duration(1000)
   .attr("height", function(d) { return d.height; }) 
-  
-  barSelectedAgeMin = Math.floor((selectedBarDown - 100) / 5.7)
-  barSelectedAgeMax = Math.floor((selectedBarUp - 100) / 5.7)
 })
 .on("click", function(e) {
   if (!selectedBar){
@@ -96,8 +93,6 @@ const barSvg = d3.select("#chart-area").append("svg")
     .transition()
     .duration(1000)
     .attr("height", 0)
-    barSelectedAgeMin = 0
-    barSelectedAgeMax = 100
     selectedBar = false
   }
 })
