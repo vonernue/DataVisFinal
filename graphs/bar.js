@@ -31,13 +31,6 @@ export default function(data, svg, barWidth, barHeight){
         .domain([1, 13])
         .range([0, barWidth]);
 
-    svg.append("g")
-        .attr("transform", "translate(0, " + barHeight + ")")
-        .call(d3.axisBottom(x)
-                .tickValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-
-            );
-
     // Histogram
     var hist = d3.histogram()
     .value(function(d) {return d.released_month; })
@@ -50,7 +43,7 @@ export default function(data, svg, barWidth, barHeight){
     var y = d3.scaleLinear()
             .range([barHeight, 0]);
     y.domain([0, d3.max(bins, function(d) { return d.length; })]);   
-    svg.append("g").call(d3.axisLeft(y));
+
 
     // Bars
     svg.selectAll("barOutline")
@@ -82,4 +75,21 @@ export default function(data, svg, barWidth, barHeight){
             return i(t);
         };
         });
+
+        
+    svg.append("g")
+    .attr("transform", "translate(0, " + barHeight + ")")
+    .call(d3.axisBottom(x)
+            .tickValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+            .tickSizeOuter(0)
+        );
+    svg.selectAll(".tick").attr("transform", function() {
+        var currentTransform = d3.select(this).attr("transform").split("(")[1].split(",");
+        var xTrans = currentTransform[0]
+        var yTrans = currentTransform[1].split(")")[0]
+        console.log(xTrans, yTrans)
+        return `translate(${parseFloat(xTrans) + 25}, ${yTrans})`
+    });
+
+    svg.append("g").call(d3.axisLeft(y));
 }
