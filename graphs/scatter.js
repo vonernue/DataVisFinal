@@ -115,6 +115,7 @@ function plotScatterUpdate(data, svg, scatterWidth, scatterHeight){
 function plotScatterUpdateAxis(data, svg, xAxis, yAxis){
     nowXAxis = xAxis;
     nowYAxis = yAxis;
+    console.log(xAxis, yAxis)
     // update label
     const xAxisLabel = xAxis.replace("_%", "")
                             .replace(/_/g, " ")

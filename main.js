@@ -1,24 +1,25 @@
 import plotBar, {plotBarUpdate, plotBarX} from './graphs/bar.js'
 import plotScatter, {plotScatterUpdate, plotScatterUpdateAxis} from './graphs/scatter.js'
+import plotPie, {plotPieUpdate} from './graphs/pie.js'
 
 var originalData = []
 var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
 
-const scatterLeft = 0, scatterTop = 220;
+const scatterLeft = 0, scatterTop = 320;
 const scatterTotalWidth = 800, scatterTotalHeight = 500;
 const scatterLegendWidth = 100, scatterLegendHeight = 500;
 const scatterMargin = {top: 40, right: 30, bottom: 40, left: 100},
       scatterWidth = scatterTotalWidth - scatterMargin.left - scatterMargin.right - scatterLegendWidth,
       scatterHeight = scatterTotalHeight - scatterMargin.top - scatterMargin.bottom;
 
-const donutLeft = 100, donutTop = -195;
-const donutTotalWidth = 360, donutTotalHeight = 200;
-const donutMargin = {top: 30, right: 30, bottom: 40, left: 40},
-      donutWidth = donutTotalWidth - donutMargin.left - donutMargin.right,
-      donutHeight = donutTotalHeight - donutMargin.top - donutMargin.bottom;
+const pieLeft = 100, pieTop = -195;
+const pieTotalWidth = 400, pieTotalHeight = 300;
+const pieMargin = {top: 30, right: 30, bottom: 40, left: 30},
+      pieWidth = pieTotalWidth - pieMargin.left - pieMargin.right,
+      pieHeight = pieTotalHeight - pieMargin.top - pieMargin.bottom;
 
 const barLeft = 0, barTop = -500;
-const barTotalWidth = 700, barTotalHeight = 200;
+const barTotalWidth = 700, barTotalHeight = 300;
 const barMargin = {top: 30, right: 30, bottom: 40, left: 100},
       barWidth = barTotalWidth - barMargin.left - barMargin.right,
       barHeight = barTotalHeight - barMargin.top - barMargin.bottom;
@@ -75,21 +76,21 @@ customXAxisSelect.onchange = function() {
     const data = getFilteredData()  
     const selectedXValue = customXAxisSelect.value;
     const selectedYValue = customYAxisSelect.value;
-    plotScatterUpdateAxis(data, scatterChart, scatterWidth, scatterHeight, selectedXValue, selectedYValue);
+    plotScatterUpdateAxis(data, scatterChart, selectedXValue, selectedYValue);
 }
 customYAxisSelect.onchange = customXAxisSelect.onchange;
 
 // donut chart
 
 const donutSvg = d3.select("#chart-area").append("svg")
-.attr("width", donutTotalWidth)
-.attr("height", donutTotalHeight)
-.attr("transform", `translate(${donutLeft}, ${donutTop})`)
+.attr("width", pieTotalWidth)
+.attr("height", pieTotalHeight)
+.attr("transform", `translate(${pieLeft}, ${pieTop})`)
 
 const donutChart = donutSvg.append("g")
-.attr("transform", `translate(${donutMargin.left}, ${donutMargin.top})`)
+.attr("transform", `translate(${pieMargin.left}, ${pieMargin.top})`)
 
-const donutColor = d3.scaleOrdinal()
+const pieColor = d3.scaleOrdinal()
 .range(["#115f9a", "#008dbe", "#00b7af", "#00da72", "#d0ee11"])
 
 const donutRadius = 70
@@ -121,6 +122,7 @@ d3.csv("./spotify-2023.csv").then(function(data) {
   originalData = data.filter((v, i, a) => v.released_year == 2023 || v.released_year == 2022)
   
   plotBar(originalData, barChart, barWidth, barHeight)
+  plotPie(originalData, donutChart, pieWidth, pieHeight, pieColor)
   // This line should be drawn after the bars
   // or the brush will be covered by the bars
   barChart.append("g").call(barBrush);
@@ -171,5 +173,5 @@ function updateView(filter){
   let data = getFilteredData()
   plotBarUpdate(data, barChart, barWidth, barHeight)
   plotScatterUpdate(data, scatterChart, scatterWidth, scatterHeight)
+  plotPieUpdate(data, donutChart, pieWidth, pieHeight)
 }
-
