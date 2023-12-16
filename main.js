@@ -1,11 +1,12 @@
 import plotBar, {plotBarUpdate, plotBarX} from './graphs/bar.js'
+import plotScatter from './graphs/scatter.js'
 
 var originalData = []
 var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
 
 const scatterLeft = 0, scatterTop = 220;
-const scatterTotalWidth = 600, scatterTotalHeight = 400;
-const scatterLegendWidth = 100, scatterLegendHeight = 400;
+const scatterTotalWidth = 800, scatterTotalHeight = 500;
+const scatterLegendWidth = 100, scatterLegendHeight = 500;
 const scatterMargin = {top: 40, right: 30, bottom: 40, left: 100},
       scatterWidth = scatterTotalWidth - scatterMargin.left - scatterMargin.right - scatterLegendWidth,
       scatterHeight = scatterTotalHeight - scatterMargin.top - scatterMargin.bottom;
@@ -16,7 +17,7 @@ const donutMargin = {top: 30, right: 30, bottom: 40, left: 40},
       donutWidth = donutTotalWidth - donutMargin.left - donutMargin.right,
       donutHeight = donutTotalHeight - donutMargin.top - donutMargin.bottom;
 
-const barLeft = 0, barTop = -400;
+const barLeft = 0, barTop = -500;
 const barTotalWidth = 700, barTotalHeight = 200;
 const barMargin = {top: 30, right: 30, bottom: 40, left: 100},
       barWidth = barTotalWidth - barMargin.left - barMargin.right,
@@ -77,7 +78,8 @@ d3.csv("./spotify-2023.csv").then(function(data) {
   // This line should be drawn after the bars
   // or the brush will be covered by the bars
   barChart.append("g").call(barBrush);
-
+  
+  plotScatter(originalData, scatterChart, scatterWidth, scatterHeight)
 });
 
 function brushStarted(){
