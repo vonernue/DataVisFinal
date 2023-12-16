@@ -1,5 +1,7 @@
 var plotScatterX = () => {}
 var plotScatterY = () => {}
+var nowXAxis = "bpm";
+var nowYAxis = "danceability_%";
 
 export default function(data, svg, scatterWidth, scatterHeight){
     // ------Scatter Plot------
@@ -64,8 +66,8 @@ export default function(data, svg, scatterWidth, scatterHeight){
     .data(data)
     .enter()
     .append("circle")
-        .attr("cx", function (d) { return plotScatterX(d.bpm); } )
-        .attr("cy", function (d) { return plotScatterY(d['danceability_%']); } )
+        .attr("cx", function (d) { return plotScatterX(d[nowXAxis]); } )
+        .attr("cy", function (d) { return plotScatterY(d[nowYAxis]); } )
         .style("opacity", 0.7)
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide)
@@ -75,7 +77,44 @@ export default function(data, svg, scatterWidth, scatterHeight){
         .style("fill", "#6B5CA5")
 }
 
+function plotScatterUpdate(data, svg, scatterWidth, scatterHeight){
+    // update axis
+    const xMin = d3.min(data, d => parseInt(d[nowXAxis]));
+    const xMax = d3.max(data, d => parseInt(d[nowXAxis]));
+    plotScatterX.domain([0, xMax]);
+    svg.select("#scatter-x-axis")
+    .transition()
+    .duration(1000)
+    .call(d3.axisBottom(plotScatterX));
+
+    const yMin = d3.min(data, d => parseInt(d[nowYAxis]));
+    const yMax = d3.max(data, d => parseInt(d[nowYAxis]));
+    plotScatterY.domain([0, yMax]);
+    svg.select("#scatter-y-axis")
+    .transition()
+    .duration(1000)
+    .call(d3.axisLeft(plotScatterY));
+    
+    // update points
+    svg.selectAll("circle")
+    .data(data)
+    .exit()
+    .transition()
+    .duration(1000)
+    .style("opacity", 0)
+
+    svg.selectAll("circle")
+    .data(data)
+    .transition()
+    .duration(1000)
+    .attr("cx", function (d) { return plotScatterX(d[nowXAxis]); } )
+    .attr("cy", function (d) { return plotScatterY(d[nowYAxis]); } )
+    .style("opacity", (d) => { return d[nowXAxis] == "0" || d[nowYAxis] == "0" ? 0 : 0.7} ) 
+}
+
 function plotScatterUpdateAxis(data, svg, xAxis, yAxis){
+    nowXAxis = xAxis;
+    nowYAxis = yAxis;
     // update label
     const xAxisLabel = xAxis.replace("_%", "")
                             .replace(/_/g, " ")
@@ -120,4 +159,4 @@ function plotScatterUpdateAxis(data, svg, xAxis, yAxis){
     .style("opacity", (d) => { return d[xAxis] == "0" || d[yAxis] == "0" ? 0 : 0.7 })
 }
 
-export { plotScatterUpdateAxis }
+export { plotScatterUpdate, plotScatterUpdateAxis }

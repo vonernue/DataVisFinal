@@ -1,5 +1,5 @@
 import plotBar, {plotBarUpdate, plotBarX} from './graphs/bar.js'
-import plotScatter, {plotScatterUpdateAxis} from './graphs/scatter.js'
+import plotScatter, {plotScatterUpdate, plotScatterUpdateAxis} from './graphs/scatter.js'
 
 var originalData = []
 var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
@@ -170,5 +170,6 @@ function updateView(filter){
   nowFilter = filter
   let data = getFilteredData()
   plotBarUpdate(data, barChart, barWidth, barHeight)
+  plotScatterUpdate(data, scatterChart, scatterWidth, scatterHeight)
 }
 
