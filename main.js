@@ -19,11 +19,7 @@ const barMargin = {top: 30, right: 30, bottom: 40, left: 100},
       barWidth = barTotalWidth - barMargin.left - barMargin.right,
       barHeight = barTotalHeight - barMargin.top - barMargin.bottom;
 
-const mapLeft = -100, mapTop = -200;
-const mapTotalWidth = 550, mapTotalHeight = 400;
-const mapMargin = {top: 10, right: 10, bottom: 10, left: 10},
-      mapWidth = mapTotalWidth - mapMargin.left - mapMargin.right,
-      mapHeight = mapTotalHeight - mapMargin.top - mapMargin.bottom;
+// scatter plot
 
 const scatterSvg = d3.select("#chart-area").append("svg")
 .attr("width", scatterTotalWidth)
@@ -32,6 +28,8 @@ const scatterSvg = d3.select("#chart-area").append("svg")
 
 const scatterChart = scatterSvg.append("g")
 .attr("transform", `translate(${scatterMargin.left}, ${scatterMargin.top})`)
+
+// donut chart
 
 const donutSvg = d3.select("#chart-area").append("svg")
 .attr("width", donutTotalWidth)
@@ -46,6 +44,8 @@ const donutColor = d3.scaleOrdinal()
 
 const donutRadius = 70
 var donutSelectedLegend = []
+
+// bar chart
 
 var selectedBarDown = 0
 var selectedBarUp = 0
