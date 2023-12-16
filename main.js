@@ -1,5 +1,5 @@
 import plotBar, {plotBarUpdate, plotBarX} from './graphs/bar.js'
-import plotScatter from './graphs/scatter.js'
+import plotScatter, {plotScatterUpdateAxis} from './graphs/scatter.js'
 
 var originalData = []
 var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
@@ -23,6 +23,25 @@ const barMargin = {top: 30, right: 30, bottom: 40, left: 100},
       barWidth = barTotalWidth - barMargin.left - barMargin.right,
       barHeight = barTotalHeight - barMargin.top - barMargin.bottom;
 
+const options = [
+  { value: 'bpm', text: 'BPM' },
+  { value: 'streams', text: '串流次數' },
+  { value: 'danceability_%', text: '律動性' },
+  { value: 'valence_%', text: '正向性' },
+  { value: 'energy_%', text: '活力性' },
+  { value: 'acousticness_%', text: '人聲感' },
+  { value: 'instrumentalness_%', text: '樂器感' },
+  { value: 'liveness_%', text: '現場演出感' },
+  { value: 'speechiness_%', text: '演說感' },
+  { value: 'in_spotify_playlists', text: 'Spotify播放清單收藏數' },
+  { value: 'in_spotify_charts', text: 'Spotify排名' },
+  { value: 'in_apple_playlists', text: 'Apple Music播放清單收藏數' },
+  { value: 'in_apple_charts', text: 'Apple Music排名' },
+  { value: 'in_deezer_playlists', text: 'Deezer播放清單收藏數' },
+  { value: 'in_deezer_charts', text: 'Deezer排名' },
+  { value: 'in_shazam_charts', text: 'Shazam排名' }
+];
+
 // scatter plot
 
 const scatterSvg = d3.select("#chart-area").append("svg")
@@ -32,6 +51,33 @@ const scatterSvg = d3.select("#chart-area").append("svg")
 
 const scatterChart = scatterSvg.append("g")
 .attr("transform", `translate(${scatterMargin.left}, ${scatterMargin.top})`)
+
+const customXAxisSelect = document.getElementById('custom-x-axis');
+const customYAxisSelect = document.getElementById('custom-y-axis');
+
+options.forEach(option => {
+    const xOption = document.createElement('option');
+    xOption.value = option.value;
+    xOption.textContent = option.text;
+    
+    const yOption = xOption.cloneNode(true);
+    
+    if(option.value === 'bpm')
+        xOption.selected = true
+    if(option.value === 'danceability_%')
+        yOption.selected = true
+
+    customXAxisSelect.appendChild(xOption);
+    customYAxisSelect.appendChild(yOption);
+});
+
+customXAxisSelect.onchange = function() {
+    const data = getFilteredData()  
+    const selectedXValue = customXAxisSelect.value;
+    const selectedYValue = customYAxisSelect.value;
+    plotScatterUpdateAxis(data, scatterChart, scatterWidth, scatterHeight, selectedXValue, selectedYValue);
+}
+customYAxisSelect.onchange = customXAxisSelect.onchange;
 
 // donut chart
 
@@ -110,14 +156,19 @@ function brushEnded({selection}){
   brushing({selection})
 }
 
-// This function will also update nowFilter
-function updateView(filter){
-  filter = nowFilter
-  let data = originalData.filter((v, i, a) => 
+function getFilteredData(filter = nowFilter){
+  return originalData.filter((v, i, a) => 
     v.released_month >= filter.sMonth &&
     v.released_month <= filter.eMonth &&
     v.bpm >= filter.sBpm &&
     v.bpm <= filter.eBpm
   )
+}
+
+// This function will also update nowFilter
+function updateView(filter){
+  nowFilter = filter
+  let data = getFilteredData()
   plotBarUpdate(data, barChart, barWidth, barHeight)
 }
+
