@@ -52,7 +52,9 @@ export default function(data, svg, barWidth, barHeight){
     .append("rect")
         .attr("x", 0)
         .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
-        .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
+        .attr("width", function(d) {
+            return x(d.x1) - x(d.x0) - 1 < 0 ? 0 : x(d.x1) - x(d.x0) - 1;
+        })
         .attr("height", function(d) { d['height']=barHeight - y(d.length); return d.height; })
         .style("fill", "#00b7af")
         .style("outline", "1px solid gray")
@@ -64,16 +66,18 @@ export default function(data, svg, barWidth, barHeight){
     .append("rect")
         .attr("x", 0)
         .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
-        .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
+        .attr("width", function(d) {
+            return x(d.x1) - x(d.x0) - 1 < 0 ? 0 : x(d.x1) - x(d.x0) - 1;
+        })
         .style("fill", "#fff")
         .classed("barRect", true)
         .transition()
         .duration(1000)
         .attrTween("height", function(d) {
         var i = d3.interpolate(barHeight - y(d.length), 0);
-        return function(t) {
-            return i(t);
-        };
+            return function(t) {
+                return i(t);
+            };
         });
 
         
