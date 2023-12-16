@@ -1,4 +1,7 @@
-import plotBar from './graphs/bar.js'
+import plotBar, {plotBarUpdate, plotBarX} from './graphs/bar.js'
+
+var originalData = []
+var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
 
 const scatterLeft = 0, scatterTop = 220;
 const scatterTotalWidth = 600, scatterTotalHeight = 400;
@@ -54,55 +57,65 @@ const barSvg = d3.select("#chart-area").append("svg")
 .attr("width", barTotalWidth)
 .attr("height", barTotalHeight)
 .attr("transform", `translate(${barLeft}, ${barTop})`)
-.on("mousedown", function(e) {
-  selectedBarDown = e.offsetX
-})
-.on("mouseup", function(e) {
-  selectedBarUp = e.offsetX
-  if (selectedBarDown > selectedBarUp){
-    let tmp = selectedBarDown
-    selectedBarDown = selectedBarUp
-    selectedBarUp = tmp
-  }
-  console.log(selectedBarUp, selectedBarDown)
-  barChart.append("rect")
-  .attr("x", selectedBarDown-100)
-  .attr("y", 0)
-  .attr("width", selectedBarUp - selectedBarDown)
-  .attr("height", barHeight)
-  .style("fill", "#808080")
-  .style("opacity", .3)
-  .classed("selectedBarRect", true)
-
-  barChart.selectAll(".barRect")
-  .filter(function(d) {
-    if (d == undefined) return false
-    return !((d.x1 * 47.5 + 50 >= selectedBarDown && d.x1 * 47.5+ 50 <= selectedBarUp) || 
-            (d.x0 * 47.5+ 50 <= selectedBarUp && d.x0 * 47.5+50 >= selectedBarDown))
-  })
-  .transition()
-  .duration(1000)
-  .attr("height", function(d) { return d.height; }) 
-})
-.on("click", function(e) {
-  if (!selectedBar){
-    selectedBar = true
-  }else{
-    barChart.selectAll(".selectedBarRect").remove()
-    barChart.selectAll(".barRect")
-    .transition()
-    .duration(1000)
-    .attr("height", 0)
-    selectedBar = false
-  }
-})
-
-.classed("barChart", true)
 
 const barChart = barSvg.append("g")
 .attr("transform", `translate(${barMargin.left}, ${barMargin.top})`)
 
+const barBrush = d3.brushX().extent([
+  [0.5, 0.5],
+  [barWidth - 0.5, barHeight - 0.5],
+])
+.on("start", brushStarted)
+.on("brush", brushing)
+.on("end", brushEnded);
+
+
 d3.csv("./spotify-2023.csv").then(function(data) {
-  data = data.filter((v, i, a) => v.released_year == 2023 || v.released_year == 2022)
-  plotBar(data, barChart, barWidth, barHeight)
+  originalData = data.filter((v, i, a) => v.released_year == 2023 || v.released_year == 2022)
+  
+  plotBar(originalData, barChart, barWidth, barHeight)
+  // This line should be drawn after the bars
+  // or the brush will be covered by the bars
+  barChart.append("g").call(barBrush);
+
 });
+
+function brushStarted(){
+  nowFilter.sMonth = 1
+  nowFilter.eMonth = 12
+  let data = originalData.filter((v, i, a) => 
+    v.released_month >= nowFilter.sMonth &&
+    v.released_month <= nowFilter.eMonth &&
+    v.bpm >= nowFilter.sBpm &&
+    v.bpm <= nowFilter.eBpm
+  )
+  plotBarUpdate(data, barChart, barWidth, barHeight)
+}
+
+function brushing({selection}){
+  if(!selection){
+    nowFilter.sMonth = 1
+    nowFilter.eMonth = 12
+  }
+  else{
+    nowFilter.sMonth = Math.floor(plotBarX.invert(selection[0]))
+    nowFilter.eMonth = Math.floor(plotBarX.invert(selection[1]))
+  }
+  updateView(nowFilter)
+}
+
+function brushEnded({selection}){
+  brushing({selection})
+}
+
+// This function will also update nowFilter
+function updateView(filter){
+  filter = nowFilter
+  let data = originalData.filter((v, i, a) => 
+    v.released_month >= filter.sMonth &&
+    v.released_month <= filter.eMonth &&
+    v.bpm >= filter.sBpm &&
+    v.bpm <= filter.eBpm
+  )
+  plotBarUpdate(data, barChart, barWidth, barHeight)
+}

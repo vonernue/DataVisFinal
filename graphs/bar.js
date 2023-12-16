@@ -126,4 +126,4 @@ function plotBarUpdate(data, svg, barWidth, barHeight){
 
 }
 
-export { plotBarUpdate }
+export { plotBarUpdate, plotBarX, plotBarY }
