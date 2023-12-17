@@ -6,19 +6,19 @@ var originalData = []
 var nowFilter = {sMonth: 1, eMonth: 12, sBpm: 0, eBpm: 1000}
 
 const scatterLeft = 0, scatterTop = 320;
-const scatterTotalWidth = 800, scatterTotalHeight = 500;
+const scatterTotalWidth = 1400, scatterTotalHeight = 500;
 const scatterLegendWidth = 100, scatterLegendHeight = 500;
 const scatterMargin = {top: 40, right: 30, bottom: 40, left: 100},
       scatterWidth = scatterTotalWidth - scatterMargin.left - scatterMargin.right - scatterLegendWidth,
       scatterHeight = scatterTotalHeight - scatterMargin.top - scatterMargin.bottom;
 
-const pieLeft = 100, pieTop = -195;
+const pieLeft = 800, pieTop = -500;
 const pieTotalWidth = 400, pieTotalHeight = 300;
 const pieMargin = {top: 30, right: 30, bottom: 40, left: 30},
       pieWidth = pieTotalWidth - pieMargin.left - pieMargin.right,
       pieHeight = pieTotalHeight - pieMargin.top - pieMargin.bottom;
 
-const barLeft = 0, barTop = -500;
+const barLeft = -400, barTop = -500;
 const barTotalWidth = 700, barTotalHeight = 300;
 const barMargin = {top: 30, right: 30, bottom: 40, left: 100},
       barWidth = barTotalWidth - barMargin.left - barMargin.right,
