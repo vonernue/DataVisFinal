@@ -76,7 +76,7 @@ customXAxisSelect.onchange = function() {
     const data = getFilteredData()  
     const selectedXValue = customXAxisSelect.value;
     const selectedYValue = customYAxisSelect.value;
-    plotScatterUpdateAxis(data, scatterChart, selectedXValue, selectedYValue);
+    plotScatterUpdateAxis(data, scatterChart, scatterWidth, scatterHeight, selectedXValue, selectedYValue);
 }
 customYAxisSelect.onchange = customXAxisSelect.onchange;
 
