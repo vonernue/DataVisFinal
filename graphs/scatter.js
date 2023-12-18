@@ -5,34 +5,6 @@ var nowYAxis = "danceability_%";
 
 export default function(data, svg, scatterWidth, scatterHeight){
     // ------Scatter Plot------
-    // Title
-    svg.append("text")
-    .attr("x", scatterWidth/2)
-    .attr("y", -20)
-    .attr("font-size", "14px")
-    .attr("font-weight", "bold")
-    .attr("text-anchor", "middle")
-    .text(`Scatter Plot By Custom Attributes`)
-    
-    // X label
-    svg.append("text")
-    .attr("id", "scatter-x-label")
-    .attr("x", scatterWidth/2)
-    .attr("y", scatterHeight+30)
-    .attr("font-size", "14px")
-    .attr("text-anchor", "middle")
-    .text("BPM")
-
-    // Y label
-    svg.append("text")
-    .attr("id", "scatter-y-label")
-    .attr("x", -30)
-    .attr("y", scatterHeight/2)
-    .attr("font-size", "14px")
-    .attr("text-anchor", "middle")
-    .attr("transform", `rotate(-90, -35, ${scatterHeight/2})`)
-    .text("Danceability")
-
     // X axis
     plotScatterX = d3.scaleLinear()
         .domain([0, 204])
@@ -51,6 +23,61 @@ export default function(data, svg, scatterWidth, scatterHeight){
     svg.append("g")
     .attr("id", "scatter-y-axis")
     .call(d3.axisLeft(plotScatterY));
+
+    // Contour
+    const contours = d3.contourDensity()
+    .x(d => plotScatterX(parseIntData(d[nowXAxis])))
+    .y(d => plotScatterY(parseIntData(d[nowYAxis])))
+    .size([scatterWidth, scatterHeight])
+    .bandwidth(30)
+    .thresholds(30)
+    (data);
+
+    const contourColor = d3.scaleLinear()
+        .domain([d3.min(contours.map((v) => v.value)), d3.max(contours.map((v) => v.value))]) // Points per square pixel.
+        .range(["white", "#69b3a2"])
+
+    svg.append("g")
+    .attr("stroke", "steelblue")
+    .attr("stroke-linejoin", "round")
+    .attr("id", "scatter-contour")
+    .selectAll()
+    .data(contours)
+    .join("path")
+        .attr("stroke-width", (d, i) => i % 5 ? 0.25 : 1)
+        .attr("d", d3.geoPath())
+        .attr("fill", function(d){ return contourColor(d.value)})
+    .transition()
+    .duration(1000)
+    .attrTween("opacity", function() { return d3.interpolate(0, 0.5); })
+
+    // Title
+    svg.append("text")
+    .attr("x", scatterWidth/2)
+    .attr("y", -20)
+    .attr("font-size", "14px")
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "middle")
+    .text(`Scatter Plot By Custom Attributes`)
+
+    // X label
+    svg.append("text")
+    .attr("id", "scatter-x-label")
+    .attr("x", scatterWidth/2)
+    .attr("y", scatterHeight+30)
+    .attr("font-size", "14px")
+    .attr("text-anchor", "middle")
+    .text("BPM")
+
+    // Y label
+    svg.append("text")
+    .attr("id", "scatter-y-label")
+    .attr("x", -30)
+    .attr("y", scatterHeight/2)
+    .attr("font-size", "14px")
+    .attr("text-anchor", "middle")
+    .attr("transform", `rotate(-90, -35, ${scatterHeight/2})`)
+    .text("Danceability")
 
     // Tip
     const tip = d3.tip()
@@ -129,6 +156,37 @@ function plotScatterUpdate(data, svg, scatterWidth, scatterHeight){
     .transition()
     .duration(1000)
     .call(d3.axisLeft(plotScatterY));
+
+    // Update Contours
+    const contours = d3.contourDensity()
+    .x(d => plotScatterX(parseIntData(d[nowXAxis])))
+    .y(d => plotScatterY(parseIntData(d[nowYAxis])))
+    .size([scatterWidth, scatterHeight])
+    .bandwidth(30)
+    .thresholds(30)
+    (data);
+
+    svg.select("#scatter-contour").remove()
+
+    const contourColor = d3.scaleLinear()
+        .domain([d3.min(contours.map((v) => v.value)), d3.max(contours.map((v) => v.value))]) // Points per square pixel.
+        .range(["white", "#69b3a2"])
+
+    svg.append("g")
+    .attr("stroke", "steelblue")
+    .attr("stroke-linejoin", "round")
+    .attr("id", "scatter-contour")
+    .selectAll()
+    .data(contours)
+    .join("path")
+        .attr("stroke-width", (d, i) => i % 5 ? 0.25 : 1)
+        .attr("d", d3.geoPath())
+        .attr("fill", function(d){ return contourColor(d.value)})
+    .transition()
+    .duration(1000)
+    .attrTween("opacity", function() { return d3.interpolate(0, 0.5); })
+
+    svg.select("#scatter-contour").lower()
 
     // update pcc line
     const coords = data.map((d) => {
