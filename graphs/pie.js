@@ -1,4 +1,3 @@
-
 export default function(data, svg, pieWidth, pieHeight){
     // ------Radius Pie Chart------
     var bmpData = data.map((d) => d.bpm)
@@ -7,6 +6,10 @@ export default function(data, svg, pieWidth, pieHeight){
         .domain([65, 200])
         .thresholds(bins)
     var binsData = histogram(bmpData)
+    var totalData = binsData.reduce((a, b) => a + b.length, 0);
+    var maxData = d3.max(binsData, function (d) {
+        return d.length;
+    });
 
     // Title
     svg.append("text")
@@ -20,13 +23,13 @@ export default function(data, svg, pieWidth, pieHeight){
     var arc = d3.arc()
         .innerRadius(0)
         .outerRadius(function (d) {
-            return d.data.length * 0.8;
+            return d.data.length * 0.6 + 20;
         });
 
     var outerArc = d3.arc()
         .innerRadius(0)
         .outerRadius(function (d) {
-            return (d.data.length + 180);
+            return (d.data.length * 0.6 + 20) * 1.1;
         });
 
     var pie = d3.pie()
@@ -49,7 +52,7 @@ export default function(data, svg, pieWidth, pieHeight){
             return colorScale(d.data.length);
         })
         .attr("stroke", "white")
-        .style("stroke-width", "1px")
+        .style("stroke-width", "0px")
         .attr("transform", `translate(${pieWidth / 2 - 20}, ${pieHeight / 2 + 30})`)
         .on("mouseover", function (d) {
             d3.select(this)
@@ -58,17 +61,21 @@ export default function(data, svg, pieWidth, pieHeight){
         })
         .on("mouseout", function (d) {
             d3.select(this)
-                .style("stroke-width", "1px");
+                .style("stroke-width", "0px");
         })
 
     // Legend
     var legend = svg.append("g")
-        .attr("transform", `translate(${pieWidth - 40}, ${pieHeight - 100})`);
+        .attr("transform", `translate(${pieWidth - 40}, ${pieHeight - 100})`)
+        .attr("id", "pie-legend");
 
     legend.selectAll("rect")
         .data(binsData)
         .enter()
         .append("rect")
+        .attr("range", function (d) {
+            return d.x0 + "-" + d.x1;
+        })
         .attr("x", 0)
         .attr("y", function (d, i) {
             return i * 20;
@@ -77,7 +84,12 @@ export default function(data, svg, pieWidth, pieHeight){
         .attr("height", 10)
         .attr("fill", function (d) {
             return colorScale(d.length);
-        });
+        })
+        .on("mouseover", function (d) {
+            d3.select(this)
+                .style("cursor", "pointer");
+        })
+
 
     legend.selectAll("text")
         .data(binsData)
@@ -94,12 +106,12 @@ export default function(data, svg, pieWidth, pieHeight){
         .attr("alignment-baseline", "middle");
 
     // pie group
-    var labelGroup = svg.append("g")
+    var pieLabelGroup = svg.append("g")
     .attr("transform", `translate(${pieWidth / 2 - 20}, ${pieHeight / 2 + 30})`)
-    .attr("id", "labelGroup");
+    .attr("id", "pie-labels");
     
     // add the polylines between chart and labels:
-    labelGroup.selectAll('allPolylines')
+    pieLabelGroup.selectAll('allPolylines')
         .data(pie(binsData))
         .enter()
         .append('polyline')
@@ -114,8 +126,11 @@ export default function(data, svg, pieWidth, pieHeight){
             posC[0] = 1.1 * pieWidth / 3 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
             return [posA, posB, posC]
         })
+        .attr("opacity", function (d) {
+            return d.data.length / totalData * 100 < 10 ? 0 : 1;
+        });
 
-    labelGroup.selectAll('allLabels')
+    pieLabelGroup.selectAll('allLabels')
         .data(pie(binsData))
         .enter()
         .append('text')
@@ -134,28 +149,32 @@ export default function(data, svg, pieWidth, pieHeight){
         })
         .attr("font-size", "10px")
         .attr("alignment-baseline", "middle")
+        .attr("opacity", function (d) {
+            return d.data.length / totalData * 100 < 10 ? 0 : 1;
+        })
         
 }
 
-function plotPieUpdate(data, svg, pieWidth, pieHeight, pieColor){
+function plotPieUpdate(data, svg, pieWidth){
     var bmpData = data.map((d) => d.bpm)
     var bins = d3.range(65, 200, 20)
     var histogram = d3.histogram()
         .domain([65, 200])
         .thresholds(bins)
     var binsData = histogram(bmpData)
+    var totalData = binsData.reduce((a, b) => a + b.length, 0);
 
 
     var arc = d3.arc()
         .innerRadius(0)
         .outerRadius(function (d) {
-            return d.data.length * 0.8;
+            return d.data.length * 0.6 + 20;
         });
     
     var outerArc = d3.arc()
         .innerRadius(0)
         .outerRadius(function (d) {
-            return (d.data.length + 180);
+            return (d.data.length * 0.6 + 20) * 1.1;
         }
     );
 
@@ -177,7 +196,7 @@ function plotPieUpdate(data, svg, pieWidth, pieHeight, pieColor){
         }
     )
     
-    var labelGroup = svg.select("#labelGroup")
+    var labelGroup = svg.select("#pie-labels")
     labelGroup.selectAll("polyline")
         .data(pie(binsData))
         .transition()
@@ -189,6 +208,9 @@ function plotPieUpdate(data, svg, pieWidth, pieHeight, pieColor){
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
             posC[0] = 1.1 * pieWidth / 3 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
             return [posA, posB, posC]
+        })
+        .attr("opacity", function (d) {
+            return d.data.length / totalData * 100 < 10 ? 0 : 1;
         })
 
     labelGroup.selectAll("text")
@@ -203,6 +225,9 @@ function plotPieUpdate(data, svg, pieWidth, pieHeight, pieColor){
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
             pos[0] = pieWidth / 2.5 * (midangle < Math.PI ? 1 : -1);
             return 'translate(' + pos + ')';
+        })
+        .attr("opacity", function (d) {
+            return d.data.length / totalData * 100 < 10 ? 0 : 1;
         })
 
 }
